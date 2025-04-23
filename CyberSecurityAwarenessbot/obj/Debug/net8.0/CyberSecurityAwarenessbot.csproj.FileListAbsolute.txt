@@ -1,0 +1,7 @@
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.GeneratedMSBuildEditorConfig.editorconfig
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.AssemblyInfoInputs.cache
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.AssemblyInfo.cs
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.csproj.CoreCompileInputs.cache
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.MvcApplicationPartsAssemblyInfo.cache
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.sourcelink.json
+/home/system/CyberSecurityAwarenessbot/obj/Debug/net8.0/CyberSecurityAwarenessbot.csproj.AssemblyReference.cache
