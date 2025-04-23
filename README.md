@@ -58,10 +58,3 @@ The System.Windows.Extensions package fixes the CS1069 error for SoundPlayer.
 CI runs on windows-latest in GitHub Actions.
 At least three commits are included in the repository.
 
-Submission
-
-greeting.wav is included or can be created with Audacity.
-CI workflow passes (check GitHub Actions for green checkmarks).
-Tested on Windows with .NET 8.0 in Visual Studio Code.
-
-
