@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Media;
+using NAudio.Wave; // Using NAudio as per .csproj
 using System.Linq;
+using System.Threading;
 
 class CybersecurityChatbot
 {
-    private static Dictionary<string, string> userMemory = new Dictionary<string, string>();
-    private static string currentTopic = null;
+    private static Dictionary<string, string?> userMemory = new Dictionary<string, string?>(); // Nullable values
+    private static string? currentTopic = null; // Nullable
     private static Random random = new Random();
 
     static void Main(string[] args)
@@ -15,74 +16,82 @@ class CybersecurityChatbot
         DisplayAsciiArt();
 
         // Display welcome message with decorative border
-        Console.WriteLine("=========================================");
-        Console.WriteLine(" Welcome to the Cybersecurity Awareness Bot ");
-        Console.WriteLine("=========================================");
+        TypeText("=========================================", 20);
+        TypeText(" Welcome to the Cybersecurity Awareness Bot ", 20);
+        TypeText("=========================================", 20);
 
-        // Placeholder for playing the voice greeting (WAV file)
+        // Play greeting.wav using NAudio
         try
         {
-            SoundPlayer player = new SoundPlayer("welcome.wav");
-            player.PlaySync(); // Plays the WAV file (placeholder)
+            using (var audioFile = new AudioFileReader("greeting.wav"))
+            using (var outputDevice = new WaveOutEvent())
+            {
+                outputDevice.Init(audioFile);
+                outputDevice.Play();
+                while (outputDevice.PlaybackState == PlaybackState.Playing)
+                {
+                    Thread.Sleep(100);
+                }
+            }
         }
         catch (Exception)
         {
-            Console.WriteLine("(Voice greeting unavailable in this environment)");
+            Console.WriteLine("(Voice greeting unavailable - ensure greeting.wav is in the output directory)");
         }
 
         // Ask for the user's name and personalize responses
-        Console.WriteLine("\nWhat’s your name?");
-        string userName = Console.ReadLine();
+        TypeText("\nWhat’s your name?", 20);
+        string? userName = Console.ReadLine(); // Nullable
         while (string.IsNullOrWhiteSpace(userName))
         {
-            Console.WriteLine("I didn’t catch that. Could you please tell me your name?");
+            TypeText("I didn’t catch that. Could you please tell me your name?", 20);
             userName = Console.ReadLine();
         }
-        userMemory["name"] = userName;
+        userMemory["name"] = userName!; // Null forgiveness after validation
 
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"\nNice to meet you, {userName}! I’m here to help you learn about staying safe online.");
+        TypeText($"\nNice to meet you, {userName}! I’m here to help you learn about staying safe online.", 20);
         Console.ResetColor();
 
         // Ask for favorite cyber topic
-        Console.WriteLine("\nWhat’s your favorite cybersecurity topic? (e.g., password, phishing, privacy)");
-        string favoriteTopic = Console.ReadLine()?.ToLower().Trim();
+        TypeText("\nWhat’s your favorite cybersecurity topic? (e.g., password, phishing, privacy)", 20);
+        string? favoriteTopic = Console.ReadLine()?.ToLower().Trim(); // Nullable
         if (!string.IsNullOrWhiteSpace(favoriteTopic))
         {
             userMemory["favoriteTopic"] = favoriteTopic;
-            Console.WriteLine($"Great choice, {userName}! I’ll keep {favoriteTopic} in mind.");
+            TypeText($"Great choice, {userName}! I’ll keep {favoriteTopic} in mind.", 20);
         }
 
         // Main chatbot loop
         bool running = true;
         while (running)
         {
-            Console.WriteLine("\nWhat would you like to know about? (e.g., password, phishing, privacy, or type 'exit' to quit)");
-            string userInput = Console.ReadLine()?.ToLower().Trim();
+            TypeText("\nWhat would you like to know about? (e.g., password, phishing, privacy, or type 'exit' to quit)", 20);
+            string? userInput = Console.ReadLine()?.ToLower().Trim(); // Nullable
 
             // Input validation and error handling
             if (string.IsNullOrWhiteSpace(userInput))
             {
-                Console.WriteLine("I didn’t quite understand that. Could you rephrase?");
+                TypeText("I didn’t quite understand that. Could you rephrase?", 20);
                 continue;
             }
 
             if (userInput == "exit")
             {
-                Console.WriteLine($"Goodbye, {userMemory["name"]}! Stay safe online!");
+                TypeText($"Goodbye, {userMemory["name"]}! Stay safe online!", 20);
                 running = false;
                 continue;
             }
 
             // Sentiment detection
-            string sentiment = DetectSentiment(userInput);
+            string? sentiment = DetectSentiment(userInput);
             if (!string.IsNullOrEmpty(sentiment))
             {
-                Console.WriteLine($"I sense you might be feeling {sentiment}. Let me help you with that!");
+                TypeText($"I sense you might be feeling {sentiment}. Let me help you with that!", 20);
             }
 
             // Keyword recognition and conversation flow
-            HandleConversation(userInput);
+            HandleConversation(userInput!); // Null forgiveness after validation
         }
     }
 
@@ -99,11 +108,21 @@ class CybersecurityChatbot
         Console.ResetColor();
     }
 
-    static string DetectSentiment(string input)
+    static void TypeText(string text, int delayMs)
     {
-        if (input.Contains("worried") || input.Contains("scared")) return "worried";
-        if (input.Contains("curious")) return "curious";
-        if (input.Contains("frustrated")) return "frustrated";
+        foreach (char c in text)
+        {
+            Console.Write(c);
+            Thread.Sleep(delayMs);
+        }
+        Console.WriteLine();
+    }
+
+    static string? DetectSentiment(string? input) // Nullable return type
+    {
+        if (input != null && (input.Contains("worried") || input.Contains("scared"))) return "worried";
+        if (input != null && input.Contains("curious")) return "curious";
+        if (input != null && input.Contains("frustrated")) return "frustrated";
         return null;
     }
 
@@ -112,15 +131,15 @@ class CybersecurityChatbot
         // Basic responses
         if (input.Contains("how are you"))
         {
-            Console.WriteLine("I’m doing great, thanks for asking! How can I assist you today?");
+            TypeText("I’m doing great, thanks for asking! How can I assist you today?", 20);
         }
         else if (input.Contains("what’s your purpose") || input.Contains("what is your purpose"))
         {
-            Console.WriteLine("I’m the Cybersecurity Awareness Bot, here to help you stay safe online!");
+            TypeText("I’m the Cybersecurity Awareness Bot, here to help you stay safe online!", 20);
         }
         else if (input.Contains("what can i ask you about"))
         {
-            Console.WriteLine("You can ask about password safety, phishing, or privacy. What interests you?");
+            TypeText("You can ask about password safety, phishing, or privacy. What interests you?", 20);
         }
         // Keyword recognition
         else if (input.Contains("password"))
@@ -132,7 +151,7 @@ class CybersecurityChatbot
                 "Consider a password manager for secure storage."
             };
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"\nPassword Safety Tip: {passwordTips[random.Next(passwordTips.Length)]}");
+            TypeText($"\nPassword Safety Tip: {passwordTips[random.Next(passwordTips.Length)]}", 20);
             Console.ResetColor();
         }
         else if (input.Contains("phishing"))
@@ -144,7 +163,7 @@ class CybersecurityChatbot
                 "Avoid clicking links in unsolicited messages."
             };
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"\nPhishing Tip: {phishingTips[random.Next(phishingTips.Length)]}");
+            TypeText($"\nPhishing Tip: {phishingTips[random.Next(phishingTips.Length)]}", 20);
             Console.ResetColor();
         }
         else if (input.Contains("privacy"))
@@ -156,7 +175,7 @@ class CybersecurityChatbot
                 "Use two-factor authentication for added security."
             };
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"\nPrivacy Tip: {privacyTips[random.Next(privacyTips.Length)]}");
+            TypeText($"\nPrivacy Tip: {privacyTips[random.Next(privacyTips.Length)]}", 20);
             Console.ResetColor();
         }
         // Follow-up or confusion handling
@@ -164,37 +183,37 @@ class CybersecurityChatbot
         {
             if (currentTopic == "password")
             {
-                Console.WriteLine("Additional Tip: Make passwords at least 12 characters long!");
+                TypeText("Additional Tip: Make passwords at least 12 characters long!", 20);
             }
             else if (currentTopic == "phishing")
             {
-                Console.WriteLine("Additional Tip: Look for poor grammar as a phishing sign!");
+                TypeText("Additional Tip: Look for poor grammar as a phishing sign!", 20);
             }
             else if (currentTopic == "privacy")
             {
-                Console.WriteLine("Additional Tip: Use a VPN on public Wi-Fi!");
+                TypeText("Additional Tip: Use a VPN on public Wi-Fi!", 20);
             }
         }
         else if (input.Contains("confused") || input.Contains("more details"))
         {
             if (currentTopic != null)
             {
-                Console.WriteLine($"Let’s dive deeper into {currentTopic}. What specifically would you like to know?");
+                TypeText($"Let’s dive deeper into {currentTopic}. What specifically would you like to know?", 20);
             }
             else
             {
-                Console.WriteLine("I’m not sure what topic we’re on. Please pick one like password, phishing, or privacy!");
+                TypeText("I’m not sure what topic we’re on. Please pick one like password, phishing, or privacy!", 20);
             }
         }
         // Memory and personalization
-        else if (userMemory.ContainsKey("favoriteTopic") && input.Contains(userMemory["favoriteTopic"]))
+        else if (userMemory.ContainsKey("favoriteTopic") && input.Contains(userMemory["favoriteTopic"]!)) // Null forgiveness
         {
-            Console.WriteLine($"Great choice, {userMemory["name"]}! Since you like {userMemory["favoriteTopic"]}, here’s a tip: Check the earlier advice or ask for more!");
+            TypeText($"Great choice, {userMemory["name"]}! Since you like {userMemory["favoriteTopic"]}, here’s a tip: Check the earlier advice or ask for more!", 20);
         }
         // Default response for unrecognized input
         else
         {
-            Console.WriteLine("I’m not sure I understand. Can you rephrase or try a topic like password, phishing, or privacy?");
+            TypeText("I’m not sure I understand. Can you rephrase or try a topic like password, phishing, or privacy?", 20);
         }
     }
 }
